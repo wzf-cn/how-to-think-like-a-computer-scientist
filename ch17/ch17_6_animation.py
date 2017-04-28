@@ -32,7 +32,18 @@ def main():
         a_queen = QueenSprite(ball,
                    (col*sq_sz+ball_offset, row*sq_sz+ball_offset))
         all_sprites.append(a_queen)
-
+    
+    # Load the sprite sheet
+    duke_sprite_sheet = pygame.image.load("duke_spritesheet.png")
+    
+    # Instantiate two duke instances, put them on the chessboard
+    duke1 = DukeSprite(duke_sprite_sheet,(sq_sz*2, 0))
+    duke2 = DukeSprite(duke_sprite_sheet,(sq_sz*5, sq_sz))
+    
+    # Add them to the list of sprites which our game loop manages
+    all_sprites.append(duke1)
+    all_sprites.append(duke2)
+    
     # Create a font for rendering text
     my_font = pygame.font.SysFont('Courier', 16)
 
@@ -40,6 +51,7 @@ def main():
     frame_rate = 0
     t0 = time.clock()
 
+    
     while True:
 
         # Look for an event from keyboard, mouse, joystick, etc.
@@ -139,7 +151,36 @@ class QueenSprite:
     def draw(self, target_surface):
         target_surface.blit(self.image, self.posn)
 
+class DukeSprite:
 
+    def __init__(self, img, target_posn):
+        self.image = img
+        self.posn = target_posn
+        self.anim_frame_count = 0
+        self.curr_patch_num = 0
+
+    def update(self):
+        if self.anim_frame_count > 0:
+            self.anim_frame_count = (self.anim_frame_count + 1 ) % 60
+            self.curr_patch_num = self.anim_frame_count // 6
+
+    def draw(self, target_surface):
+        patch_rect = (self.curr_patch_num * 50, 0,
+                        50, self.image.get_height())
+        target_surface.blit(self.image, self.posn, patch_rect)
+    
+    def handle_click(self):
+        if self.anim_frame_count == 0:
+            self.anim_frame_count = 5
+
+    def contains_point(self, pt):
+          """ Return True if my sprite rectangle contains point pt """
+          (my_x, my_y) = self.posn
+          my_width = self.image.get_width() / 10
+          my_height = self.image.get_height()
+          (x, y) = pt
+          return ( x >= my_x and x < my_x + my_width and
+                   y >= my_y and y < my_y + my_height)        
           
 
 main()
